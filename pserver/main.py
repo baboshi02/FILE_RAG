@@ -22,7 +22,7 @@ def root():
 
 
 @app.post("/pdf")
-def get_pdf(pdf: Annotated[bytes, File()]):
+def post_pdf(pdf: Annotated[bytes, File()]):
     document = Document(stream=pdf)
     markdown = to_markdown(document)
     chunked_string = chunk_string(markdown, 1500)
@@ -40,9 +40,20 @@ def get_pdf(pdf: Annotated[bytes, File()]):
     return {"parsed": parsed_objects}
 
 
-@app.post("/files/")
-def post_file(pdf: Annotated[bytes, File()]):
-    document = Document(stream=pdf)
-    markdown = to_markdown(document)
-    print("file content: ", markdown)
-    return {"markdown": markdown}
+@app.get("/pdf")
+def post_file(index_name: str, question: str):
+    if not pc.has_index(index_name):
+        return {"message": "Sorry index not found"}
+    dense_index = pc.Index(index_name)
+    results = dense_index.search(
+        namespace="book", query={"top_k": 3, "inputs": {"text": question}}
+    )
+    filtered_results = [
+        {
+            "chunk_text": result_text["fields"]["chunk_text"],
+            "score": result_text["_score"],
+        }
+        for result_text in results["result"]["hits"]
+    ]
+    print(filtered_results)
+    return filtered_results
