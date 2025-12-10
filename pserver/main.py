@@ -74,5 +74,15 @@ def post_file(index_name: str, question: str):
         }
         for result_text in results["result"]["hits"]
     ]
-    print(filtered_results)
-    return filtered_results
+    chunked_text = [x["chunk_text"] for x in filtered_results]
+    print(chunked_text)
+    messages = [
+        (
+            "system",
+            "You are a helpful assistan that uses RAG to answer questions provided from the following three top snippets answer the question",
+        )
+    ]
+    messages.extend([("human", chunk) for chunk in chunked_text])
+    messages.append(("human", question))
+    response = llm.invoke(messages)
+    return response.content
