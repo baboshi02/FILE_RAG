@@ -6,14 +6,33 @@ from pinecone import Pinecone
 from utils.chunk import chunk_string, parse_to_embedd
 import os
 import dotenv
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 dotenv.load_dotenv()
+from langchain_groq import ChatGroq
+
+
 api_key = os.getenv("PINECONE_API_KEY")
 
+
+llm = ChatGroq(
+    model="llama-3.1-8b-instant",
+    temperature=0,
+    max_tokens=None,
+    timeout=None,
+    max_retries=2,
+    # other params...
+)
 pc = Pinecone(api_key=api_key)
 
 
 app = FastAPI()
+
+
+@app.get("/ask")
+def ask_ai(question: str):
+    response = llm.invoke([("human", question)])
+    return response.content
 
 
 @app.get("/")
