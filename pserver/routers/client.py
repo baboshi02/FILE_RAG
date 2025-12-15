@@ -1,50 +1,20 @@
 from typing import Annotated
-from fastapi import APIRouter, Form, File
+from fastapi import APIRouter, Depends, Form, File
 from utils.pdf_to_pages import pdf_to_pages
 from utils.chunk import parse_to_embedd, chunk_string
-from payload_models.registeration import SigninPayload, LoginPayload
 from llm.llm import llm
 from pinecone import Pinecone
-from models.user import User
-from jose import jwt
+from dependencies.authorization import check_authorization
 import dotenv
 import os
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(check_authorization)])
 
 dotenv.load_dotenv()
 
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 pc = Pinecone(api_key=PINECONE_API_KEY)
 PC_MODEL = os.getenv("PC_MODEL") or ""
-
-
-@router.post("/signin")
-async def signin(payload: SigninPayload):
-    email = payload.email
-    password = payload.password
-    username = payload.username
-    await User.create(email=email, password=password, username=username)
-    jwt_secret = os.getenv("JWT_SECRET") or "secret"
-    token = jwt.encode(
-        {"email": email, "username": username}, jwt_secret, algorithm="HS256"
-    )
-    return {"token": token}
-
-
-@router.post("/login")
-async def login(payload: LoginPayload):
-    email = payload.email
-    password = payload.password
-    try:
-        user = await User.get(email=email, password=password)
-    except Exception:
-        return {"message": "No user with given credentials"}
-    jwt_secret = os.getenv("JWT_SECRET") or "secret"
-    token = jwt.encode(
-        {"email": user.email, "username": user.username}, jwt_secret, algorithm="HS256"
-    )
-    return {"token": token}
 
 
 @router.post("/pdf")

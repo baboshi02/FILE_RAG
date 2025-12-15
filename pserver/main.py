@@ -4,7 +4,7 @@ from typing import AsyncGenerator
 from tortoise import Tortoise
 import os
 import dotenv
-from routers import admin, client
+from routers import admin, client, registeration
 
 dotenv.load_dotenv()
 
@@ -34,3 +34,4 @@ async def startup_shutdown_handler(app: FastAPI) -> AsyncGenerator[None, None]:
 app = FastAPI(lifespan=startup_shutdown_handler)
 app.include_router(admin.router)
 app.include_router(client.router)
+app.include_router(registeration.router)

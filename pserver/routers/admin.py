@@ -1,12 +1,12 @@
 from models.user import User
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from llm.llm import llm
 from typing import Annotated
 from fastapi import File
 from utils.pdf_to_pages import pdf_to_pages
+from dependencies.authorization import check_authorization
 
-
-router = APIRouter(prefix="/admin")
+router = APIRouter(prefix="/admin", dependencies=[Depends(check_authorization)])
 
 
 @router.get("/ask")
