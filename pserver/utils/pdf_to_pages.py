@@ -26,7 +26,5 @@ def pdf_to_pages(pdf: bytes):
             ocr = page.get_textpage_ocr(dpi=200)
             text = ocr.extractText()
             text = clean_ocr_text(text)
-        print(text)
-
         markdown.append(text)
     return markdown

@@ -4,41 +4,20 @@ from pydantic import BaseModel
 from pymupdf import Document
 from pymupdf4llm import to_markdown
 from pinecone import Pinecone
+from tortoise import Tortoise
 from utils.chunk import chunk_string, parse_to_embedd
 from utils.pdf_to_pages import pdf_to_pages
 import os
 import dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
+from models.user import User
+from jose import jwt
 
 dotenv.load_dotenv()
 from langchain_groq import ChatGroq
 
 
-class Payload(BaseModel):
-    username: str
-    bookname: str
-
-
 api_key = os.getenv("PINECONE_API_KEY")
-import re
-import unicodedata
-
-
-def clean_ocr_text(text):
-    # Normalize unicode
-    text = unicodedata.normalize("NFKC", text)
-
-    # Fix hyphenation across line breaks
-    text = re.sub(r"-\s*\n\s*", "", text)
-
-    # Replace multiple spaces/newlines
-    text = re.sub(r"\n+", "\n", text)
-    text = re.sub(r"[ \t]+", " ", text)
-
-    # Strip extra whitespace
-    text = text.strip()
-
-    return text
 
 
 llm = ChatGroq(
@@ -47,12 +26,81 @@ llm = ChatGroq(
     max_tokens=None,
     timeout=None,
     max_retries=2,
-    # other params...
 )
 pc = Pinecone(api_key=api_key)
 
 
 app = FastAPI()
+
+
+class SignInPayload(BaseModel):
+    email: str
+    password: str
+    username: str
+
+
+@app.delete("/users")
+async def deleteUsers():
+    await Tortoise.init(
+        db_url="postgres://baboshi:baboshi@localhost:5432/mydatabase",
+        modules={"models": ["models.user"]},
+    )
+    await Tortoise.generate_schemas()
+    await User.all().delete()
+
+
+@app.get("/show_users")
+async def showUsers():
+    await Tortoise.init(
+        db_url="postgres://baboshi:baboshi@localhost:5432/mydatabase",
+        modules={"models": ["models.user"]},
+    )
+    await Tortoise.generate_schemas()
+    users = await User.all()
+    return users
+
+
+@app.post("/signin")
+async def signin(payload: SignInPayload):
+    await Tortoise.init(
+        db_url="postgres://baboshi:baboshi@localhost:5432/mydatabase",
+        modules={"models": ["models.user"]},
+    )
+    await Tortoise.generate_schemas()
+    email = payload.email
+    password = payload.password
+    username = payload.username
+    await User.create(email=email, password=password, username=username)
+    jwt_secret = os.getenv("JWT_SECRET") or "secret"
+    token = jwt.encode(
+        {"email": email, "username": username}, jwt_secret, algorithm="HS256"
+    )
+    return {"token": token}
+
+
+class LoginPayload(BaseModel):
+    email: str
+    password: str
+
+
+@app.post("/login")
+async def login(payload: LoginPayload):
+    await Tortoise.init(
+        db_url="postgres://baboshi:baboshi@localhost:5432/mydatabase",
+        modules={"models": ["models.user"]},
+    )
+    await Tortoise.generate_schemas()
+    email = payload.email
+    password = payload.password
+    try:
+        user = await User.get(email=email, password=password)
+    except Exception:
+        return {"message": "No user with given credentials"}
+    jwt_secret = os.getenv("JWT_SECRET") or "secret"
+    token = jwt.encode(
+        {"email": user.email, "username": user.username}, jwt_secret, algorithm="HS256"
+    )
+    return {"token": token}
 
 
 @app.post("/pdf_to_text")
@@ -80,10 +128,7 @@ def post_pdf(
 ):
     index_name = username
     namespace = bookname
-    document = Document(stream=pdf)
-    markdown = to_markdown(document)
-    chunked_string = chunk_string(markdown, 1500)
-    parsed_objects = parse_to_embedd(chunked_string)
+    pages = pdf_to_pages(pdf)
     if not pc.has_index(index_name):
         pc.create_index_for_model(
             name=index_name,
@@ -92,7 +137,10 @@ def post_pdf(
             embed={"model": "llama-text-embed-v2", "field_map": {"text": "chunk_text"}},
         )
     dense_index = pc.Index(index_name)
-    dense_index.upsert_records(namespace, parsed_objects)
+    parsed_objects = parse_to_embedd(pages)
+    for chunk in chunks(parsed_objects, 96):
+        print("chunk: ", chunk)
+        dense_index.upsert_records(namespace, chunk)
     return {"parsed": parsed_objects}
 
 
