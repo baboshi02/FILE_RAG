@@ -1,11 +1,9 @@
 from typing import Dict
-from dotenv import load_dotenv
 import jwt
-import os
-
-load_dotenv()
+from config import JWT_SECRET
 
 
 def encode(payload: Dict):
-    jwt_secret = os.getenv("JWT_SECRET") or "secret"
+    jwt_secret = JWT_SECRET
     token = jwt.encode(payload, jwt_secret, algorithm="HS256")
+    return token

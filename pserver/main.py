@@ -2,14 +2,8 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 from tortoise import Tortoise
-import os
-import dotenv
 from routers import admin, client, registeration
-
-dotenv.load_dotenv()
-
-
-DATABASE_URL = os.getenv("DATABASE_URL") or ""
+from config import DATABASE_URL
 
 
 @asynccontextmanager

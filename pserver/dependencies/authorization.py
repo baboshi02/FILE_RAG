@@ -1,11 +1,7 @@
 from fastapi import HTTPException, Header
 from typing import Annotated
-import dotenv
 from jose.jwt import decode
-import os
-
-dotenv.load_dotenv
-JWT_SECRET = os.getenv("JWT_SECRET") or ""
+from config import JWT_SECRET
 
 
 def check_authorization(Authorization: Annotated[str, Header()]):
@@ -13,6 +9,7 @@ def check_authorization(Authorization: Annotated[str, Header()]):
         raise HTTPException(status_code=400, detail="Provide Authentication Header")
     try:
         jwt_token = Authorization.split(" ")[1]
-        decode(jwt_token, JWT_SECRET, algorithms=["HS256"])
+        decoded = decode(jwt_token, JWT_SECRET, algorithms=["HS256"])
+        return decoded["username"]
     except BaseException:
         raise HTTPException(status_code=400, detail="Invalid Authentication")

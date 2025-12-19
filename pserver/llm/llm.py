@@ -1,10 +1,7 @@
 from langchain_groq import ChatGroq
-import os
-import dotenv
+from config import GROQ_MODEL
 
-dotenv.load_dotenv()
 
-GROQ_MODEL = os.getenv("GROQ_MODEL") or ""
 llm = ChatGroq(
     model=GROQ_MODEL,
     temperature=0,
