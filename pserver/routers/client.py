@@ -36,7 +36,11 @@ async def post_pdf(
     pdf: Annotated[bytes, File()],
     id: Annotated[int, Depends(check_authorization)],
 ):
-    namespace = str(id)
+    try:
+        user = await User.get(id=id)
+    except Exception:
+        raise HTTPException(400, detail="Error while querying user")
+    namespace = user.username
     pages = pdf_to_pages(pdf)
     dense_index = init_pc(index_name)
     embedded_pages = parse_to_embedd(pages, bookname)
@@ -61,6 +65,7 @@ async def post_pdf(
 
 # TODO: Increase abstraction layer
 # TODO: Fix llm questioning
+# TODO: Change dense Index search to include both book name and book id for better synchronization
 @router.get("/pdf")
 async def chat_about_file(
     id: Annotated[int, Depends(check_authorization)],
