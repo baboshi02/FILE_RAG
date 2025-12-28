@@ -1,8 +1,8 @@
-import FileUploader from "./FileUploader";
-import Footer from "./Footer";
-import MainSection from "./MainSection";
-import Section from "./Section";
+import Footer from "../components/Footer";
+import MainSection from "../components/MainSection";
+import Section from "../components/Section";
 
+//TODO: Transfer all to path resolution @pathname
 const Main = () => {
   return (
     <div className="p-2.5">
@@ -13,7 +13,6 @@ const Main = () => {
       <Section>
         <MainSection />
       </Section>
-      <FileUploader />
       <Footer />
     </div>
   );
