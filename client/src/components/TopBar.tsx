@@ -4,9 +4,10 @@ interface IROUTES {
   name: string;
   url: string;
 }
+
 const routes: IROUTES[] = [
   { name: "Home", url: "/" },
-  { name: "ASK", url: "/ask" },
+  { name: "books", url: "/books" },
 ];
 const TopBar = () => {
   const location = useLocation();
@@ -16,7 +17,7 @@ const TopBar = () => {
       <div className="space-x-2">
         {routes.map((route) => (
           <Link
-            className={pathName === route.url ? "text-gray-500" : ""}
+            className={pathName == route.url ? "text-gray-500" : ""}
             to={route.url}
           >
             {route.name}

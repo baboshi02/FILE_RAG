@@ -3,9 +3,11 @@ import { createRoot } from "react-dom/client";
 import App from "./pages/App.tsx";
 import { BrowserRouter as Router, Route, Routes } from "react-router";
 import Login from "./pages/login.tsx";
-import AskingLLM from "./pages/Asking.tsx";
+import Books from "./pages/books.tsx";
 import PageNotFound from "./pages/PageNotFound.tsx";
 import Main from "./pages/Main.tsx";
+import AskingLLM from "./pages/AskingLLM.tsx";
+import SignIn from "./pages/SignIn.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -14,9 +16,11 @@ createRoot(document.getElementById("root")!).render(
         <Routes>
           <Route element={<App />}>
             <Route index element={<Main />} />
-            <Route path="/ask" element={<AskingLLM />} />
+            <Route path="/books" element={<Books />} />
+            <Route path="/books/:book_id" element={<AskingLLM />} />
           </Route>
-          <Route path="/registeration" element={<Login />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signin" element={<SignIn />} />
           <Route path="/*" element={<PageNotFound />} />
         </Routes>
       </Router>

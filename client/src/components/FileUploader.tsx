@@ -21,7 +21,7 @@ const FileUploader = () => {
           className="mb-2 block text-left text-sm"
           htmlFor="multiple-file-upload"
         >
-          Upload File
+          Add File
         </Label>
         <FileInput id="multiple-file-upload" onChange={onChange} />
       </div>
