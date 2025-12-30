@@ -9,6 +9,7 @@ const routes: IROUTES[] = [
   { name: "Home", url: "/" },
   { name: "books", url: "/books" },
 ];
+//TODO: Add Text Area For returned text from llm
 const TopBar = () => {
   const location = useLocation();
   const pathName = location.pathname;
@@ -17,7 +18,13 @@ const TopBar = () => {
       <div className="space-x-2">
         {routes.map((route) => (
           <Link
-            className={pathName == route.url ? "text-gray-500" : ""}
+            className={
+              pathName == route.url && pathName == "/"
+                ? "text-gray-500"
+                : pathName.startsWith("/books") && route.url == "/books"
+                  ? "text-gray-500"
+                  : ""
+            }
             to={route.url}
           >
             {route.name}

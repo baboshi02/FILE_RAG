@@ -8,6 +8,7 @@ import PageNotFound from "./pages/PageNotFound.tsx";
 import Main from "./pages/Main.tsx";
 import AskingLLM from "./pages/AskingLLM.tsx";
 import SignIn from "./pages/SignIn.tsx";
+import BooksLayout from "./pages/BooksLayout.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -16,8 +17,10 @@ createRoot(document.getElementById("root")!).render(
         <Routes>
           <Route element={<App />}>
             <Route index element={<Main />} />
-            <Route path="/books" element={<Books />} />
-            <Route path="/books/:book_id" element={<AskingLLM />} />
+            <Route element={<BooksLayout />}>
+              <Route path="/books" element={<Books />} />
+              <Route path="/books/:book_id" element={<AskingLLM />} />
+            </Route>
           </Route>
           <Route path="/login" element={<Login />} />
           <Route path="/signin" element={<SignIn />} />

@@ -1,14 +1,23 @@
-import { useParams } from "react-router";
+import { Textarea } from "flowbite-react";
+//TODO: ADD Return back button
 const AskingLLM = () => {
-  const { book_id } = useParams();
   return (
-    <div className="flex flex-col items-center">
-      <label className="text-sm" htmlFor="ask-llm">
-        ask about {book_id}
-      </label>
-      <input className="bg-white" name="ask-llm" type="text" />
+    <div className=" h-full flex flex-col items-center justify-end p-2 ">
+      <CustomTextArea />
     </div>
   );
 };
 
+const CustomTextArea = () => {
+  return (
+    <div className=" w-[75vw] items-start flex flex-col ">
+      <Textarea
+        placeholder="Ask LLM "
+        required
+        rows={4}
+        className="resize-none"
+      />
+    </div>
+  );
+};
 export default AskingLLM;

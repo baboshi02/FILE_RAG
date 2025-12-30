@@ -5,9 +5,11 @@ import TopBar from "../components/TopBar";
 
 function App() {
   return (
-    <div className="h-full overflow-scroll">
+    <div className="h-full flex flex-col ">
       <TopBar />
-      <Outlet />
+      <div className="flex-1 overflow-scroll ">
+        <Outlet />
+      </div>
     </div>
   );
 }
