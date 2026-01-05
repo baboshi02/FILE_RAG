@@ -1,8 +1,10 @@
 import { Textarea } from "flowbite-react";
+import ExampleLLmOutput from "../components/llmOutput";
 //TODO: ADD Return back button
 const AskingLLM = () => {
   return (
-    <div className=" h-full flex flex-col items-center justify-end p-2 ">
+    <div className=" h-full flex flex-col gap-1 items-center  p-2 ">
+      <ExampleLLmOutput />
       <CustomTextArea />
     </div>
   );
